@@ -101,9 +101,10 @@ with open(f'{year}_{month}.csv', 'w', newline='', encoding='utf-8-sig') as csvfi
     # 建立 CSV 檔寫入器
     writer = csv.writer(csvfile)
     # 寫入一列資料
+    writer.writerow(["公司代號", "公司名稱", "當月營收", "上月營收", "上上月營收", "上上上月營收", "MOM", "去年同期營收", "YOY"])
     writer.writerow(first_row)
     writer.writerow(number)  # 寫入檔案的年度和月份
-    writer.writerow(["公司代號", "公司名稱", "當月營收", "上月營收", "上上月營收", "上上上月營收", "MOM", "去年同期營收", "YOY"])
+    
     # 寫入另外幾列資料
     for i in range(len(List)):
         writer.writerow(List[i])

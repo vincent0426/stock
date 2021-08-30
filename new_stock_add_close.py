@@ -3,17 +3,30 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import datetime
+import pandas as pd
+from io import StringIO
+import json
+import time
+
 starttime = datetime.datetime.now()
-
+sii_close_url = "https://www.twse.com.tw/exchangeReport/STOCK_DAY_AVG_ALL?response=open_data"
+rsii = requests.get(sii_close_url)
+df = pd.read_csv(StringIO(rsii.text.replace("=", "")))
+url = f"https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&_={int(time.time())}"
+reqs = requests.get(url)
+#利用json.loads()解碼JSON
+reqsjson = json.loads(reqs.text)
+d = {}
+for req in reqsjson["aaData"]:
+    d[req[0]] = req[2]
 def getClose(stock):
-    url = f"http://www.tendy.net/partner/ml_search.php?ap=tendy&tendykey=8134af9f07712292ac00657d796f5278&sid=Y9999&query_str={stock}"
-    req = requests.get(url)
-    soup = BeautifulSoup(req.text, "html.parser")
-    req = soup.find_all("script")[13]
-    f = req.string.find("收")
-    n = req.string.find("<", f)
-    return req.string[f+2:n]
-
+    try:
+        return df[df["股票代號"] == stock].iat[0,2]
+    except:
+        return d[stock]
+    else:
+        return "error"
+ 
 # 處理資料
 List = []
 def add_things(h, last):
@@ -48,10 +61,10 @@ def add_things(h, last):
                 except:
                     temp_list.append("None")
                 try:
-                    temp_list.append(getClose(stock_list[2]))
+                    cur = getClose(stock_list[2])
+                    temp_list.append(cur)
                 except:
-                    temp_list.append("None")
-                
+                    temp_list.append("Error")
                 List.append(temp_list)
 
 
